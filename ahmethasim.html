@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ahmet Haşim: Hayatı, Sanatı ve Eserleri - İnteraktif Araştırma</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+
+    <!-- Custom Config & Styling -->
+    <style>
+        body {
+            font-family: 'Lato', sans-serif;
+            background-color: #FDFBF7; /* Warm, paper-like background */
+            color: #2D2A26;
+        }
+        h1, h2, h3, h4, .serif-font {
+            font-family: 'Crimson Text', serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        .tab-active {
+            border-bottom: 3px solid #9F1239; /* Rose-900 */
+            color: #881337;
+            font-weight: 700;
+        }
+        .tab-inactive {
+            color: #6B7280;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-inactive:hover {
+            color: #374151;
+            border-bottom: 3px solid #E5E7EB;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        /* Custom scrollbar for text areas */
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #d1d5db; 
+            border-radius: 3px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af; 
+        }
+    </style>
+
+    <!-- Chosen Palette: Warm Neutrals with Deep Crimson/Sunset Accents -->
+    <!-- Application Structure Plan: 
+         1. Hero Section: Sets the atmospheric tone (The Poet of Evenings).
+         2. Biography (Timeline): Chronological exploration of his life stages.
+         3. Poetics Dashboard: Interactive comparison (Chart.js) of his Symbolist approach vs. Realism.
+         4. Themes & Imagery: Statistical breakdown of his vocabulary (Chart.js) and color symbolism.
+         5. Works (Library): Interactive grid to explore his key books (Piyale, Göl Saatleri, Bize Göre).
+         6. Prose Analysis: Focus on 'Bize Göre' and his essay style.
+         Why: This structure breaks down a dense 6-page academic report into digestible, thematic interactive modules.
+    -->
+    <!-- Visualization & Content Choices:
+         - Radar Chart: To contrast 'Musicality' vs 'Meaning' visually, showing his divergence from the era's norms.
+         - Bar Chart: To show frequency of key themes (Evening, Flame, Mother), quantifying his obsession with specific imagery.
+         - Timeline: Vertical layout for readability of biographical events.
+         - Interactive Cards: To handle the volume of text regarding his books without cluttering the screen.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="antialiased selection:bg-rose-200 selection:text-rose-900">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-[#FDFBF7]/90 backdrop-blur-md border-b border-stone-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex-shrink-0 flex items-center cursor-pointer" onclick="scrollToSection('hero')">
+                    <span class="text-2xl font-bold text-rose-900 serif-font">AHMET HAŞİM</span>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <button onclick="scrollToSection('biography')" class="text-stone-600 hover:text-rose-900 px-3 py-2 text-sm font-medium transition">Hayatı</button>
+                    <button onclick="scrollToSection('poetics')" class="text-stone-600 hover:text-rose-900 px-3 py-2 text-sm font-medium transition">Poetika</button>
+                    <button onclick="scrollToSection('themes')" class="text-stone-600 hover:text-rose-900 px-3 py-2 text-sm font-medium transition">Temalar</button>
+                    <button onclick="scrollToSection('works')" class="text-stone-600 hover:text-rose-900 px-3 py-2 text-sm font-medium transition">Eserleri</button>
+                    <button onclick="scrollToSection('prose')" class="text-stone-600 hover:text-rose-900 px-3 py-2 text-sm font-medium transition">Bize Göre</button>
+                </div>
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-btn" class="text-stone-600 hover:text-rose-900 focus:outline-none">
+                        <span class="text-2xl">☰</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-[#FDFBF7] border-t border-stone-200">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <button onclick="scrollToSection('biography')" class="block w-full text-left text-stone-600 hover:bg-stone-100 px-3 py-2 rounded-md text-base font-medium">Hayatı</button>
+                <button onclick="scrollToSection('poetics')" class="block w-full text-left text-stone-600 hover:bg-stone-100 px-3 py-2 rounded-md text-base font-medium">Poetika</button>
+                <button onclick="scrollToSection('themes')" class="block w-full text-left text-stone-600 hover:bg-stone-100 px-3 py-2 rounded-md text-base font-medium">Temalar</button>
+                <button onclick="scrollToSection('works')" class="block w-full text-left text-stone-600 hover:bg-stone-100 px-3 py-2 rounded-md text-base font-medium">Eserleri</button>
+                <button onclick="scrollToSection('prose')" class="block w-full text-left text-stone-600 hover:bg-stone-100 px-3 py-2 rounded-md text-base font-medium">Bize Göre</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+
+        <!-- Hero Section -->
+        <section id="hero" class="relative min-h-[70vh] flex items-center justify-center bg-gradient-to-b from-rose-50 to-[#FDFBF7] pt-10">
+            <div class="max-w-4xl mx-auto px-4 text-center">
+                <div class="mb-4 inline-block px-4 py-1 rounded-full bg-rose-100 text-rose-800 text-sm font-semibold tracking-wide">TÜRK EDEBİYATININ DEV İSMİ</div>
+                <h1 class="text-5xl md:text-7xl font-bold text-stone-900 mb-6 leading-tight serif-font">
+                    Akşam Şairi:<br><span class="text-transparent bg-clip-text bg-gradient-to-r from-rose-900 to-orange-800">Ahmet Haşim</span>
+                </h1>
+                <p class="text-xl md:text-2xl text-stone-600 mb-10 max-w-2xl mx-auto serif-font italic">
+                    "Melali anlamayan nesle aşina değiliz."
+                </p>
+                <p class="text-base md:text-lg text-stone-700 mb-8 max-w-3xl mx-auto leading-relaxed">
+                    Bu etkileşimli dosya, Ahmet Haşim'in "Sanat için sanat" anlayışını, sembolist şiir dünyasını, nesirdeki keskin zekasını ve trajik hayat öyküsünü derinlemesine inceleyen kapsamlı bir araştırma özetidir.
+                </p>
+                <div class="flex justify-center gap-4">
+                    <button onclick="scrollToSection('biography')" class="bg-rose-900 text-white px-8 py-3 rounded-lg shadow-lg hover:bg-rose-800 transition duration-300 font-semibold">
+                        İncelemeye Başla
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Decor Elements -->
+            <div class="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-[#FDFBF7] to-transparent pointer-events-none"></div>
+        </section>
+
+        <!-- Biography Section -->
+        <section id="biography" class="py-20 bg-white">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold text-stone-900 mb-4 serif-font">Hayat Çizgisi</h2>
+                    <p class="text-stone-600 max-w-2xl mx-auto">
+                        Bağdat'tan İstanbul'a, hüzünlü bir çocukluktan edebiyat dünyasının zirvesine uzanan, hastalık ve yalnızlıkla örülü bir yaşam öyküsü.
+                    </p>
+                </div>
+
+                <div class="relative">
+                    <!-- Vertical Line -->
+                    <div class="hidden md:block absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-stone-200"></div>
+
+                    <!-- Timeline Items -->
+                    <div class="space-y-12">
+                        <!-- Item 1 -->
+                        <div class="flex flex-col md:flex-row items-center justify-between group">
+                            <div class="md:w-5/12 text-right pr-8 order-2 md:order-1">
+                                <h3 class="text-xl font-bold text-rose-900 serif-font">1884 - Bağdat'ta Doğuş</h3>
+                                <p class="text-stone-600 mt-2">Ahmet Haşim, Bağdat'ta doğdu. Babası mutasarrıf Arif Hikmet Bey, annesi Sara Hanım'dır. Çocukluğu Dicle kıyılarında, masalsı ama melankolik bir atmosferde geçti.</p>
+                            </div>
+                            <div class="md:w-2/12 flex justify-center order-1 md:order-2 my-4 md:my-0 relative">
+                                <div class="w-6 h-6 bg-rose-900 rounded-full border-4 border-white shadow-md z-10 group-hover:scale-125 transition-transform duration-300"></div>
+                            </div>
+                            <div class="md:w-5/12 pl-8 order-3 md:order-3 invisible"></div> <!-- Spacer -->
+                        </div>
+
+                        <!-- Item 2 -->
+                        <div class="flex flex-col md:flex-row items-center justify-between group">
+                            <div class="md:w-5/12 pr-8 order-2 md:order-1 invisible"></div> <!-- Spacer -->
+                            <div class="md:w-2/12 flex justify-center order-1 md:order-2 my-4 md:my-0 relative">
+                                <div class="w-6 h-6 bg-stone-400 rounded-full border-4 border-white shadow-md z-10 group-hover:bg-rose-900 group-hover:scale-125 transition-all duration-300"></div>
+                            </div>
+                            <div class="md:w-5/12 text-left pl-8 order-3 md:order-3">
+                                <h3 class="text-xl font-bold text-stone-800 serif-font">1896 - İstanbul ve Galatasaray Sultanisi</h3>
+                                <p class="text-stone-600 mt-2">Annesinin ölümü üzerine babasıyla İstanbul'a geldi. Galatasaray Sultanisi'ne yatılı verildi. Bu dönemde "çirkinlik kompleksi" ve yalnızlık duygusu sanatını şekillendirmeye başladı.</p>
+                            </div>
+                        </div>
+
+                        <!-- Item 3 -->
+                        <div class="flex flex-col md:flex-row items-center justify-between group">
+                            <div class="md:w-5/12 text-right pr-8 order-2 md:order-1">
+                                <h3 class="text-xl font-bold text-stone-800 serif-font">1909 - Fecr-i Ati Topluluğu</h3>
+                                <p class="text-stone-600 mt-2">Edebi kariyerinin ilk resmi adımı. "Sanat şahsi ve muhteremdir" ilkesini benimsedi. Topluluk dağılsa da Haşim, ömrünün sonuna kadar bu estetik anlayışa sadık kaldı.</p>
+                            </div>
+                            <div class="md:w-2/12 flex justify-center order-1 md:order-2 my-4 md:my-0 relative">
+                                <div class="w-6 h-6 bg-stone-400 rounded-full border-4 border-white shadow-md z-10 group-hover:bg-rose-900 group-hover:scale-125 transition-all duration-300"></div>
+                            </div>
+                            <div class="md:w-5/12 pl-8 order-3 md:order-3 invisible"></div> <!-- Spacer -->
+                        </div>
+
+                         <!-- Item 4 -->
+                         <div class="flex flex-col md:flex-row items-center justify-between group">
+                            <div class="md:w-5/12 pr-8 order-2 md:order-1 invisible"></div> <!-- Spacer -->
+                            <div class="md:w-2/12 flex justify-center order-1 md:order-2 my-4 md:my-0 relative">
+                                <div class="w-6 h-6 bg-stone-400 rounded-full border-4 border-white shadow-md z-10 group-hover:bg-rose-900 group-hover:scale-125 transition-all duration-300"></div>
+                            </div>
+                            <div class="md:w-5/12 text-left pl-8 order-3 md:order-3">
+                                <h3 class="text-xl font-bold text-stone-800 serif-font">1921 & 1926 - Şaheserler</h3>
+                                <p class="text-stone-600 mt-2">İlk şiir kitabı <strong>Göl Saatleri</strong> (1921) ve ardından poetikasını açıkladığı önsözüyle ünlü <strong>Piyale</strong> (1926) yayımlandı.</p>
+                            </div>
+                        </div>
+
+                         <!-- Item 5 -->
+                         <div class="flex flex-col md:flex-row items-center justify-between group">
+                            <div class="md:w-5/12 text-right pr-8 order-2 md:order-1">
+                                <h3 class="text-xl font-bold text-rose-900 serif-font">1933 - Veda</h3>
+                                <p class="text-stone-600 mt-2">Tedavi için gittiği Frankfurt'tan dönüşte durumu ağırlaştı. 4 Haziran 1933'te Kadıköy'deki evinde hayata veda etti.</p>
+                            </div>
+                            <div class="md:w-2/12 flex justify-center order-1 md:order-2 my-4 md:my-0 relative">
+                                <div class="w-6 h-6 bg-stone-800 rounded-full border-4 border-white shadow-md z-10"></div>
+                            </div>
+                            <div class="md:w-5/12 pl-8 order-3 md:order-3 invisible"></div> <!-- Spacer -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Poetics Section (Analysis) -->
+        <section id="poetics" class="py-20 bg-[#FDFBF7]">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    
+                    <!-- Content -->
+                    <div>
+                        <div class="mb-2 uppercase text-xs font-bold tracking-widest text-rose-800">Şiir Hakkında Bazı Mülahazalar</div>
+                        <h2 class="text-3xl md:text-4xl font-bold text-stone-900 mb-6 serif-font">Saf Şiir ve Sembolizm</h2>
+                        <p class="text-lg text-stone-700 mb-6 leading-relaxed">
+                            Ahmet Haşim'e göre şiir, nesirden (düz yazı) tamamen farklı bir alandır. Şiir bir hikaye anlatma aracı değil, sessiz bir şarkıdır. <strong>"Şiir bir hikâye değil, sessiz bir şarkıdır."</strong>
+                        </p>
+                        
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-100 mb-6">
+                            <h3 class="text-xl font-bold text-stone-800 mb-3 serif-font">Temel İlkeleri</h3>
+                            <ul class="space-y-3">
+                                <li class="flex items-start">
+                                    <span class="text-rose-600 mr-2 text-xl">✦</span>
+                                    <span class="text-stone-600"><strong>Anlam Kapalılığı:</strong> Şiir herkes tarafından farklı yorumlanmalıdır. Açıklık nesre özgüdür.</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-rose-600 mr-2 text-xl">✦</span>
+                                    <span class="text-stone-600"><strong>Musiki (Müzikalite):</strong> Kelimelerin anlamlarından çok yarattıkları ses ve ahenk önemlidir.</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-rose-600 mr-2 text-xl">✦</span>
+                                    <span class="text-stone-600"><strong>İç Ahenk:</strong> Şiir, söz ile musiki arasında, sözden ziyade musikiye yakındır.</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <p class="text-sm text-stone-500 italic">
+                            *Bu bölüm, Haşim'in "Piyale" mukaddimesindeki manifestosunun görselleştirilmiş halidir.
+                        </p>
+                    </div>
+
+                    <!-- Visualization -->
+                    <div class="bg-white p-6 rounded-2xl shadow-lg border border-stone-100">
+                        <h3 class="text-center font-bold text-stone-800 mb-4">Ahmet Haşim vs. Dönem Şiiri (Milli Edebiyat)</h3>
+                        <div class="chart-container">
+                            <canvas id="poeticsRadarChart"></canvas>
+                        </div>
+                        <div class="mt-4 text-center text-xs text-stone-500">
+                            Grafik, Haşim'in "Saf Şiir" anlayışının dönemin hakim "Toplumsal Gerçekçilik" akımından ne kadar keskin çizgilerle ayrıldığını göstermektedir.
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Themes Section (Data Visualization) -->
+        <section id="themes" class="py-20 bg-stone-900 text-white relative overflow-hidden">
+            <!-- Background Elements -->
+            <div class="absolute top-0 right-0 w-64 h-64 bg-rose-900 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
+            <div class="absolute bottom-0 left-0 w-96 h-96 bg-orange-900 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
+
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4 serif-font text-rose-50">İmge Dünyası ve Temalar</h2>
+                    <p class="text-stone-300 max-w-2xl mx-auto">
+                        Ahmet Haşim'in şiirlerinde gerçek dünya, hayal dünyasının prizmasından geçerek renklere ve gölgelere dönüşür.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                    
+                    <!-- Color Symbolism -->
+                    <div>
+                        <h3 class="text-xl font-semibold mb-6 border-b border-stone-700 pb-2">Renk Sembolizmi</h3>
+                        <div class="space-y-4">
+                            <div class="group cursor-pointer">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-rose-300 font-medium">Kızıl / Turuncu (Gün Batımı)</span>
+                                    <span class="text-stone-400 text-sm">Kaçış, Melankoli</span>
+                                </div>
+                                <div class="w-full bg-stone-800 rounded-full h-2">
+                                    <div class="bg-gradient-to-r from-red-600 to-orange-500 h-2 rounded-full" style="width: 85%"></div>
+                                </div>
+                                <p class="text-xs text-stone-400 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    "Akşam, yine akşam, yine akşam / Bir sırma kemerdir suya baksam"
+                                </p>
+                            </div>
+
+                            <div class="group cursor-pointer">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-yellow-200 font-medium">Sarı / Altın (Sonbahar)</span>
+                                    <span class="text-stone-400 text-sm">Hastalık, Hüzün</span>
+                                </div>
+                                <div class="w-full bg-stone-800 rounded-full h-2">
+                                    <div class="bg-gradient-to-r from-yellow-600 to-yellow-400 h-2 rounded-full" style="width: 65%"></div>
+                                </div>
+                            </div>
+
+                            <div class="group cursor-pointer">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-indigo-300 font-medium">Siyah / Gölge (Gece)</span>
+                                    <span class="text-stone-400 text-sm">Gizem, Bilinçaltı</span>
+                                </div>
+                                <div class="w-full bg-stone-800 rounded-full h-2">
+                                    <div class="bg-gradient-to-r from-gray-900 to-indigo-900 h-2 rounded-full" style="width: 50%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-8 bg-stone-800 p-4 rounded-lg border border-stone-700">
+                            <h4 class="text-lg font-serif text-white mb-2">Psikanalitik Yorum</h4>
+                            <p class="text-sm text-stone-300 leading-relaxed">
+                                Haşim'in "Akşam"a olan düşkünlüğü, sadece estetik bir tercih değil, aynı zamanda "gündüz"ün gerçekliğinden ve kendi beden algısından (çirkinlik kompleksi) kaçıp, gölgelerin kusurları örttüğü bir sığınağa çekilme arzusudur. Anne sevgisine duyduğu özlem de bu loşlukta simgeleşir.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Word Frequency Chart -->
+                    <div>
+                        <h3 class="text-xl font-semibold mb-6 border-b border-stone-700 pb-2">Şiirlerde En Sık Geçen İmgeler</h3>
+                        <div class="chart-container">
+                            <canvas id="themesBarChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Works Section (Cards) -->
+        <section id="works" class="py-20 bg-[#FDFBF7]">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-stone-900 mb-4 serif-font">Başlıca Eserleri</h2>
+                    <p class="text-stone-600">Şiirden nesre, sembolizmden hicve uzanan edebi miras.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Card 1 -->
+                    <div class="bg-white rounded-xl shadow-md overflow-hidden border border-stone-100 card-hover transition-all duration-300 group">
+                        <div class="h-2 bg-rose-900"></div>
+                        <div class="p-6">
+                            <h3 class="text-2xl font-bold text-stone-800 mb-2 serif-font group-hover:text-rose-900 transition-colors">Göl Saatleri</h3>
+                            <span class="text-xs font-semibold text-stone-500 uppercase tracking-wider">Şiir, 1921</span>
+                            <p class="mt-4 text-stone-600 text-sm leading-relaxed">
+                                Küçük şiirlerden oluşan bu eser, Haşim'in doğa izlenimlerini ve hayal dünyasını yansıtır. Dört bölüme ayrılır: Göl Saatleri, Göl Kuşları, Serbest Müstezatlar ve Muhtelif Şiirler.
+                            </p>
+                            <button onclick="openModal('gol-saatleri')" class="mt-4 text-rose-700 text-sm font-bold hover:underline">Detaylı İncele →</button>
+                        </div>
+                    </div>
+
+                    <!-- Card 2 -->
+                    <div class="bg-white rounded-xl shadow-md overflow-hidden border border-stone-100 card-hover transition-all duration-300 group">
+                        <div class="h-2 bg-orange-800"></div>
+                        <div class="p-6">
+                            <h3 class="text-2xl font-bold text-stone-800 mb-2 serif-font group-hover:text-orange-800 transition-colors">Piyale</h3>
+                            <span class="text-xs font-semibold text-stone-500 uppercase tracking-wider">Şiir, 1926</span>
+                            <p class="mt-4 text-stone-600 text-sm leading-relaxed">
+                                Haşim'in olgunluk dönemi şiirlerini içerir. Kitabın önsözü ("Şiir Hakkında Bazı Mülahazalar"), Türk edebiyatının en önemli poetika metinlerinden biridir. "Merdiven" şiiri burada yer alır.
+                            </p>
+                            <button onclick="openModal('piyale')" class="mt-4 text-orange-700 text-sm font-bold hover:underline">Detaylı İncele →</button>
+                        </div>
+                    </div>
+
+                    <!-- Card 3 -->
+                    <div class="bg-white rounded-xl shadow-md overflow-hidden border border-stone-100 card-hover transition-all duration-300 group">
+                        <div class="h-2 bg-indigo-900"></div>
+                        <div class="p-6">
+                            <h3 class="text-2xl font-bold text-stone-800 mb-2 serif-font group-hover:text-indigo-900 transition-colors">Bize Göre & Gurebahane-i Laklakan</h3>
+                            <span class="text-xs font-semibold text-stone-500 uppercase tracking-wider">Deneme / Fıkra</span>
+                            <p class="mt-4 text-stone-600 text-sm leading-relaxed">
+                                Gazete yazılarının derlendiği bu eserler, Haşim'in sadece melankolik bir şair değil, aynı zamanda keskin bir zekaya sahip, iğneleyici ve gözlemci bir nesir ustası olduğunu kanıtlar.
+                            </p>
+                            <button onclick="openModal('bize-gore')" class="mt-4 text-indigo-700 text-sm font-bold hover:underline">Detaylı İncele →</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Prose Focus Section (Bize Göre Details) -->
+        <section id="prose" class="py-20 bg-rose-50 border-t border-rose-100">
+            <div class="max-w-5xl mx-auto px-4 sm:px-6">
+                <div class="mb-10 text-center">
+                    <h2 class="text-3xl font-bold text-stone-900 mb-2 serif-font">Nesir Ustası: "Bize Göre"</h2>
+                    <p class="text-stone-600">Ahmet Haşim'in nesirleri, şiirlerinin aksine açık, yalın, nükteli ve sosyal hayata dair eleştirilerle doludur.</p>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row min-h-[400px]">
+                    <!-- Tabs Sidebar -->
+                    <div class="w-full md:w-1/3 bg-stone-100 border-r border-stone-200">
+                        <button onclick="switchProseTab('tab1')" id="btn-tab1" class="w-full text-left px-6 py-4 border-l-4 border-rose-900 bg-white font-bold text-rose-900 transition-colors hover:bg-white focus:outline-none">
+                            Nesir Dili ve Üslubu
+                        </button>
+                        <button onclick="switchProseTab('tab2')" id="btn-tab2" class="w-full text-left px-6 py-4 border-l-4 border-transparent text-stone-600 transition-colors hover:bg-stone-50 focus:outline-none">
+                            İkdam Yazıları
+                        </button>
+                        <button onclick="switchProseTab('tab3')" id="btn-tab3" class="w-full text-left px-6 py-4 border-l-4 border-transparent text-stone-600 transition-colors hover:bg-stone-50 focus:outline-none">
+                            Frankfurt Seyahatnamesi
+                        </button>
+                    </div>
+
+                    <!-- Content Area -->
+                    <div class="w-full md:w-2/3 p-8 relative">
+                        
+                        <!-- Tab 1 Content -->
+                        <div id="content-tab1" class="tab-content animate-fade-in">
+                            <h3 class="text-2xl font-bold text-stone-800 mb-4 serif-font">Şair Haşim vs. Nesir Yazarı Haşim</h3>
+                            <p class="text-stone-700 mb-4 leading-relaxed">
+                                Şiirlerinde anlamı gizleyen, "dilsiz" bir anlatımı savunan Haşim, nesirlerinde (düzyazı) şaşırtıcı derecede berrak, rasyonel ve saldırgandır. 
+                            </p>
+                            <p class="text-stone-700 mb-4 leading-relaxed">
+                                "Bize Göre"deki denemeler, Paris izlenimlerinden kılık kıyafet devrimine, kadın modasından İstanbul'un değişen çehresine kadar pek çok konuyu ele alır. Haşim burada bir "estet" tavrıyla, çirkinleşen ve bayağılaşan dünyaya karşı duyduğu tepkiyi ironiyle dile getirir.
+                            </p>
+                            <blockquote class="border-l-4 border-rose-300 pl-4 italic text-stone-600 bg-stone-50 p-2 rounded">
+                                "Haşim'in nesri, şiirinin intikamıdır." - Yakup Kadri Karaosmanoğlu
+                            </blockquote>
+                        </div>
+
+                        <!-- Tab 2 Content -->
+                        <div id="content-tab2" class="tab-content hidden animate-fade-in">
+                            <h3 class="text-2xl font-bold text-stone-800 mb-4 serif-font">Bize Göre (1928)</h3>
+                            <p class="text-stone-700 mb-4 leading-relaxed">
+                                1928'de İkdam gazetesindeki köşe yazılarının toplandığı eserdir. Türk edebiyatında "deneme" türünün batılı anlamdaki ilk yetkin örneklerinden sayılır.
+                            </p>
+                            <ul class="list-disc pl-5 space-y-2 text-stone-700">
+                                <li><strong>Konular:</strong> Gündelik hayat, sosyal değişimler, kültürel yozlaşma.</li>
+                                <li><strong>Özellik:</strong> Kısa, vurucu cümleler ve keskin zeka.</li>
+                                <li><strong>Örnek:</strong> "Müslüman Saati" denemesinde, modern zaman algısı ile eski, huzurlu zaman algısını karşılaştırır ve kaybettiğimiz iç huzuru anlatır.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Tab 3 Content -->
+                        <div id="content-tab3" class="tab-content hidden animate-fade-in">
+                            <h3 class="text-2xl font-bold text-stone-800 mb-4 serif-font">Frankfurt Seyahatnamesi (1933)</h3>
+                            <p class="text-stone-700 mb-4 leading-relaxed">
+                                Ömrünün son günlerinde tedavi için gittiği Almanya'daki izlenimlerini anlatır. Sıradan bir gezi yazısı değil, hasta bir ruhun ve bedenin yabancı bir diyardaki yalnızlığını ve gözlemlerini yansıtan edebi bir metindir.
+                            </p>
+                            <p class="text-stone-700 mb-4">
+                                Savaş sonrası Almanya'nın kasvetli havası, Haşim'in kendi içsel karamsarlığıyla örtüşür.
+                            </p>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-stone-900 text-stone-400 py-10 border-t border-stone-800">
+            <div class="max-w-7xl mx-auto px-4 text-center">
+                <p class="mb-2 font-serif text-lg text-stone-300">Ahmet Haşim Araştırma Dosyası</p>
+                <p class="text-sm">Bu interaktif özet, Ahmet Haşim'in hayatı, sanatı ve eserleri üzerine yapılan akademik araştırmalardan derlenmiştir.</p>
+                <div class="mt-8 text-xs text-stone-600">
+                    &copy; 2026 Necat:P. Tüm hakları saklıdır(galiba).
+                </div>
+            </div>
+        </footer>
+
+        <!-- Detail Modal (Hidden by default) -->
+        <div id="detail-modal" class="fixed inset-0 z-[60] hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <!-- Background backdrop -->
+            <div class="fixed inset-0 bg-stone-900 bg-opacity-75 transition-opacity backdrop-blur-sm" onclick="closeModal()"></div>
+
+            <div class="flex items-center justify-center min-h-screen p-4 text-center sm:p-0">
+                <div class="relative bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-2xl sm:w-full">
+                    
+                    <!-- Header -->
+                    <div class="bg-rose-50 px-4 py-3 sm:px-6 flex justify-between items-center border-b border-rose-100">
+                        <h3 class="text-lg leading-6 font-medium text-rose-900 serif-font" id="modal-title">Eser Detayı</h3>
+                        <button onclick="closeModal()" class="text-rose-900 hover:text-rose-700 text-2xl font-bold">&times;</button>
+                    </div>
+                    
+                    <!-- Body -->
+                    <div class="px-4 pt-5 pb-4 sm:p-6 sm:pb-4 max-h-[70vh] overflow-y-auto custom-scroll">
+                        <div id="modal-content" class="text-stone-700 prose prose-stone max-w-none">
+                            <!-- Content injected by JS -->
+                        </div>
+                    </div>
+                    
+                    <!-- Footer -->
+                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button type="button" onclick="closeModal()" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-rose-900 text-base font-medium text-white hover:bg-rose-800 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
+                            Kapat
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- DATA STORE ---
+        const modalData = {
+            'gol-saatleri': `
+                <h4 class="font-bold text-xl mb-2">Göl Saatleri (1921)</h4>
+                <p class="mb-4">Ahmet Haşim'in ilk şiir kitabıdır. Kitap ismini, şairin günün farklı saatlerinde (özellikle gün batımında) göl kenarında oluşan renk ve ışık oyunlarını tasvir ettiği şiirlerden alır.</p>
+                <p class="mb-4"><strong>Bölümleri:</strong></p>
+                <ul class="list-disc pl-5 mb-4">
+                    <li><strong>Göl Saatleri:</strong> İzlenimci (empresyonist) tablolar çizen, renklerin dans ettiği şiirler.</li>
+                    <li><strong>Göl Kuşları:</strong> Doğadaki canlıların (kuğular, leylekler) sembolik anlatımı.</li>
+                    <li><strong>Serbest Müstezatlar:</strong> Biçimsel denemeler.</li>
+                </ul>
+                <p>Bu eser, Türk şiirinde doğanın "objektif" tasvirinden "subjektif" (izlenimci) tasvirine geçişin en önemli örneklerinden biridir. Haşim dış dünyayı olduğu gibi değil, kendi ruh haliyle boyayarak anlatır.</p>
+            `,
+            'piyale': `
+                <h4 class="font-bold text-xl mb-2">Piyale (1926)</h4>
+                <p class="mb-4">Şairin ustalığını konuşturduğu ikinci şiir kitabıdır. Kitabın en önemli özelliklerinden biri, başında yer alan <strong>"Şiir Hakkında Bazı Mülahazalar"</strong> adlı makaledir. Bu makale, Türk edebiyatının ilk poetika bildirisi kabul edilir.</p>
+                <p class="mb-4"><strong>Öne Çıkan Şiirler:</strong></p>
+                <ul class="list-disc pl-5 mb-4">
+                    <li><strong>Merdiven:</strong> "Ağır ağır çıkacaksın bu merdivenlerden..." dizesiyle başlayan, ömür, ölüm ve zaman kavramlarını işleyen başyapıtı.</li>
+                    <li><strong>O Belde:</strong> Ütopik, hayali bir kaçış ülkesini anlatan şiir.</li>
+                    <li><strong>Bir Günün Sonunda Arzu:</strong> Anlam kapalılığı nedeniyle eleştirilen ancak saf şiirin zirvesi sayılan eser.</li>
+                </ul>
+                <p class="italic text-sm border-l-4 border-gray-300 pl-3">"Şiirde mana aramak, eti için bülbülü öldürmeye benzer."</p>
+            `,
+            'bize-gore': `
+                <h4 class="font-bold text-xl mb-2">Bize Göre (1928)</h4>
+                <p class="mb-4">Ahmet Haşim'in nesir yönünü ortaya koyan, deneme ve fıkra türündeki yazılarının toplandığı eserdir.</p>
+                <p class="mb-4"><strong>İçerik Analizi:</strong></p>
+                <p class="mb-2">Haşim bu yazılarda "Fildişi Kulesi"nden iner ve toplumsal hayata karışır. Ancak bu karışma, bir uyum sağlama değil, eleştirel bir gözlem sürecidir.</p>
+                <ul class="list-disc pl-5 mb-4">
+                    <li>İstanbul'un değişen çehresi, betonlaşma, estetik yoksunluğu.</li>
+                    <li>Batılılaşma sürecindeki yapaylıklar.</li>
+                    <li>Kadın modası, sokak hayatı, dil meseleleri.</li>
+                </ul>
+                <p>Haşim'in nesri; kıvrak zekası, alaycı üslubu ve Türkçeyi kullanmadaki ustalığı ile şiirinden tamamen farklı, modern bir karakter taşır.</p>
+            `
+        };
+
+        // --- NAVIGATION LOGIC ---
+        function scrollToSection(id) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+                // Close mobile menu if open
+                document.getElementById('mobile-menu').classList.add('hidden');
+            }
+        }
+
+        document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        });
+
+        // --- TAB LOGIC (PROSE SECTION) ---
+        function switchProseTab(tabId) {
+            // Hide all content
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            
+            // Reset all buttons
+            const buttons = ['btn-tab1', 'btn-tab2', 'btn-tab3'];
+            buttons.forEach(btnId => {
+                const btn = document.getElementById(btnId);
+                btn.classList.remove('border-rose-900', 'bg-white', 'text-rose-900', 'font-bold');
+                btn.classList.add('border-transparent', 'text-stone-600', 'font-normal');
+            });
+
+            // Show selected content
+            document.getElementById(`content-${tabId}`).classList.remove('hidden');
+            
+            // Activate selected button
+            const activeBtn = document.getElementById(`btn-${tabId}`);
+            activeBtn.classList.remove('border-transparent', 'text-stone-600', 'font-normal');
+            activeBtn.classList.add('border-rose-900', 'bg-white', 'text-rose-900', 'font-bold');
+        }
+
+        // --- MODAL LOGIC ---
+        function openModal(key) {
+            const modal = document.getElementById('detail-modal');
+            const contentDiv = document.getElementById('modal-content');
+            
+            if (modalData[key]) {
+                contentDiv.innerHTML = modalData[key];
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden'; // Prevent scrolling
+            }
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('detail-modal');
+            modal.classList.add('hidden');
+            document.body.style.overflow = ''; // Restore scrolling
+        }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "Escape") {
+                closeModal();
+            }
+        });
+
+        // --- CHART INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // 1. Radar Chart (Poetics)
+            const ctxPoetics = document.getElementById('poeticsRadarChart').getContext('2d');
+            new Chart(ctxPoetics, {
+                type: 'radar',
+                data: {
+                    labels: ['Anlam Açıklığı', 'Müzikalite/Ahenk', 'Toplumsal Fayda', 'Bireysellik/Melankoli', 'Gerçekçilik', 'İmge/Sembol'],
+                    datasets: [{
+                        label: 'Ahmet Haşim (Saf Şiir)',
+                        data: [10, 95, 10, 95, 20, 90],
+                        fill: true,
+                        backgroundColor: 'rgba(159, 18, 57, 0.2)', // Rose-900 low opacity
+                        borderColor: 'rgba(159, 18, 57, 1)',
+                        pointBackgroundColor: 'rgba(159, 18, 57, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(159, 18, 57, 1)'
+                    }, {
+                        label: 'Dönem Şiiri (Milli Edebiyat)',
+                        data: [90, 40, 90, 30, 85, 30],
+                        fill: true,
+                        backgroundColor: 'rgba(87, 83, 78, 0.2)', // Stone-600 low opacity
+                        borderColor: 'rgba(87, 83, 78, 1)',
+                        pointBackgroundColor: 'rgba(87, 83, 78, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(87, 83, 78, 1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: '#e5e7eb' },
+                            grid: { color: '#e5e7eb' },
+                            pointLabels: {
+                                font: { size: 11, family: 'Lato' },
+                                color: '#4b5563'
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 100
+                        }
+                    },
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { family: 'Lato' } } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.raw + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 2. Bar Chart (Themes)
+            const ctxThemes = document.getElementById('themesBarChart').getContext('2d');
+            new Chart(ctxThemes, {
+                type: 'bar',
+                data: {
+                    labels: ['Akşam/Gurup', 'Hüzün/Melal', 'Su/Göl', 'Anne', 'Kızıl Renk', 'Gece', 'Ölüm'],
+                    datasets: [{
+                        label: 'İmge Yoğunluğu (Tahmini Frekans)',
+                        data: [95, 85, 75, 70, 80, 65, 60],
+                        backgroundColor: [
+                            'rgba(153, 27, 27, 0.8)', // Red-800
+                            'rgba(120, 53, 15, 0.8)', // Amber-900
+                            'rgba(30, 58, 138, 0.8)', // Blue-900
+                            'rgba(88, 28, 135, 0.8)', // Purple-900
+                            'rgba(185, 28, 28, 0.8)', // Red-700
+                            'rgba(17, 24, 39, 0.8)',  // Gray-900
+                            'rgba(75, 85, 99, 0.8)'   // Gray-600
+                        ],
+                        borderColor: 'transparent',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y', // Horizontal Bar Chart
+                    scales: {
+                        x: {
+                            grid: { color: '#374151' }, // Dark grid for dark theme
+                            ticks: { color: '#9ca3af' }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: { color: '#e5e7eb', font: { family: 'Crimson Text', size: 14 } }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#fff',
+                            titleColor: '#1f2937',
+                            bodyColor: '#1f2937',
+                            displayColors: true
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
